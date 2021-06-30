@@ -34,13 +34,13 @@ def watermarkPhotos(submissions, apiKey, saveLocation):
         watermarkedImage.save(saveLocation + '\\' + studentName + imageExtension)
 
 def main():
-    apiKey = input('Enter the JotForm API key\n')
+    apiKey = str(raw_input('Enter the JotForm API key\n'))
     jotformClient = JotformAPIClient(apiKey)
     forms = jotformClient.get_forms()
     formId = selectFormId(forms)
-    saveLocation = input('Enter the path to the folder where you would like the files saved.\n\
+    saveLocation = raw_input('Enter the path to the folder where you would like the files saved.\n\
                          You will need to create a folder if one does not already exist.\n\
-                         \n(e.g. "C:\\Users\\MartyBaker\\Documents\\WarmFuzzies2021\\\n')
+                         \n(e.g. "C:\\Users\\MartyBaker\\Documents\\WarmFuzzies2021\\"\n')
     watermarkPhotos(jotformClient.get_form_submissions(formId), apiKey, saveLocation)
 
 if __name__ == '__main__':
