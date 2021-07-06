@@ -1,6 +1,7 @@
 from jotform import *
 from PIL import Image
 from PIL import ImageDraw
+from PIL import ImageFont
 from io import BytesIO
 import requests
 
@@ -26,11 +27,16 @@ def watermarkPhotos(submissions, apiKey, saveLocation):
         imageRequest = requests.get(imageUrl, headers={'apiKey':apiKey})
         studentImage = Image.open(BytesIO(imageRequest.content))
         width, height = studentImage.size
-        # Add 200px white margin at the bottom of the image for the student's name
-        watermarkedImage = Image.new(studentImage.mode, (width, height + 200), (255, 255, 255))
+        # Add white margin (10% of image height) at the bottom of the image for the student's name
+        watermarkedImage = Image.new(studentImage.mode, (width, int(float(height) * 1.1)), (255, 255, 255))
         watermarkedImage.paste(studentImage, (0, 0))
         # Add student's name on bottom margin in black text
-        ImageDraw.Draw(watermarkedImage).text((0, height), studentName, (0, 0, 0))
+        ImageDraw.Draw(watermarkedImage).text(
+            (0, height),
+            studentName,
+            (0, 0, 0),
+            font=ImageFont.truetype('arial.ttf', size=12)
+        )
         watermarkedImage.save(saveLocation + '\\' + studentName + imageExtension)
 
 def main():
@@ -38,10 +44,9 @@ def main():
     jotformClient = JotformAPIClient(apiKey)
     forms = jotformClient.get_forms()
     formId = selectFormId(forms)
-    saveLocation = raw_input('Enter the path to the folder where you would like the files saved.\n\
-                         You will need to create a folder if one does not already exist.\n\
-                         \n(e.g. "C:\\Users\\MartyBaker\\Documents\\WarmFuzzies2021\\"\n')
+    saveLocation = raw_input('Enter the path to the folder where you would like the files saved.\nYou will need to create a folder if one does not already exist.\n(e.g. "C:\\Users\\MartyBaker\\Documents\\WarmFuzzies2021\\")\n')
     watermarkPhotos(jotformClient.get_form_submissions(formId), apiKey, saveLocation)
+    print('All images have been downloaded and watermarked!')
 
 if __name__ == '__main__':
     main()
