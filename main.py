@@ -35,10 +35,12 @@ def processSubmissions(submissions, apiKey, saveLocation):
             # Rotate image if uploaded sideways (assuming uploaded image is in portrait)
             width, height = studentImage.size
             if (width > height): studentImage.rotate(270)
-            resizedStudentImage = studentImage.resize((900, 1500))  # 3x5 @ 300dpi
-            # Add student's name as a watermark
-            watermarkedImage = watermarkPhoto(studentName, resizedStudentImage)
-            watermarkedImage.save(saveLocation + '\\' + studentName + imageExtension)
+            for i in range(4):
+                studentImage.rotate(i * 90) # Rotate in all possible orientations
+                resizedStudentImage = studentImage.resize((900, 1500))  # 3x5 @ 300dpi
+                # Add student's name as a watermark
+                watermarkedImage = watermarkPhoto(studentName, resizedStudentImage)
+                watermarkedImage.save(saveLocation + '\\' + studentName + '_' + i + imageExtension)
         except:
             erroredStudents.append(submissions[submissionIndex]['answers']['3']['prettyFormat'])
     for studentName in erroredStudents:
