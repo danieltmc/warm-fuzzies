@@ -14,7 +14,7 @@ def selectFormId(forms):
     else:
         # List forms that the user can choose
         for i in range(len(forms)):
-            print '#{num} {name}'.format(num=i + 1, name=forms[i]['title'])
+            print('#{num} {name}'.format(num=i + 1, name=forms[i]['title']))
         # Return the ID of the form that the user chose
         return forms[int(input('Select the number of the form that you would like to process\n')) - 1]['id']
 
