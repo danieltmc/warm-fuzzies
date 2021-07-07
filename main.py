@@ -4,6 +4,7 @@ from PIL import ImageDraw
 from PIL import ImageFont
 from io import BytesIO
 import requests
+from tqdm import tqdm
 
 
 def selectFormId(forms):
@@ -19,7 +20,8 @@ def selectFormId(forms):
 
 
 def processSubmissions(submissions, apiKey, saveLocation):
-    for submission in submissions:
+    for submissionIndex in tqdm(range(len(submissions))):
+        submission = submissions[submissionIndex]
         studentName = submission['answers']['3']['prettyFormat']
         imageUrl = submission['answers']['4']['answer'][0]
         # Preserve format of uploaded image
