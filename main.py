@@ -14,7 +14,7 @@ def selectFormId(forms):
     else:
         # List forms that the user can choose
         for i in range(len(forms)):
-            print '#{num} {name}'.format(num=i + 1, name=forms[i]['title'])
+            print('#{num} {name}'.format(num=i + 1, name=forms[i]['title']))
         # Return the ID of the form that the user chose
         return forms[int(input('Select the number of the form that you would like to process\n')) - 1]['id']
 
@@ -43,7 +43,7 @@ def processSubmissions(submissions, apiKey, saveLocation):
             erroredStudents.append(submissions[submissionIndex]['answers']['3']['prettyFormat'])
     for studentName in erroredStudents:
         print('Failed to watermark ' + studentName + '\'s image.  '
-              'They might have uploaded an incorrect file type.')
+                                                     'They might have uploaded an incorrect file type.')
 
 
 def watermarkPhoto(studentName, resizedStudentImage):
@@ -64,13 +64,13 @@ def watermarkPhoto(studentName, resizedStudentImage):
 
 
 def main():
-    apiKey = str(raw_input('Enter the JotForm API key\n'))
+    apiKey = str(input('Enter the JotForm API key\n'))
     jotformClient = JotformAPIClient(apiKey)
     forms = jotformClient.get_forms()
     formId = selectFormId(forms)
-    saveLocation = raw_input('Enter the path to the folder where you would like the files saved.\n'
-                             'You will need to create a folder if one does not already exist.\n'
-                             '(e.g. "C:\\Users\\MartyBaker\\Documents\\WarmFuzzies2021\\")\n')
+    saveLocation = input('Enter the path to the folder where you would like the files saved.\n'
+                         'You will need to create a folder if one does not already exist.\n'
+                         '(e.g. "C:\\Users\\MartyBaker\\Documents\\WarmFuzzies2021\\")\n')
     print('\nDownloading and watermarking images now...')
     processSubmissions(jotformClient.get_form_submissions(formId, limit='1000'), apiKey, saveLocation)
     print('All images have been downloaded and watermarked!')
