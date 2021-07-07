@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 def selectFormId(forms):
     # If there is only one form, then return that form's ID
-    if len(forms) is 1:
+    if len(forms) == 1:
         return forms[0]['id']
     else:
         # List forms that the user can choose
@@ -33,19 +33,34 @@ def processSubmissions(submissions, apiKey, saveLocation):
             imageRequest = requests.get(imageUrl, headers={'apiKey': apiKey})
             studentImage = Image.open(BytesIO(imageRequest.content))
             # Rotate image if uploaded sideways (assuming uploaded image is in portrait)
-            width, height = studentImage.size
-            if (width > height): studentImage.rotate(270)
             for i in range(4):
-                studentImage.rotate(i * 90) # Rotate in all possible orientations
-                resizedStudentImage = studentImage.resize((900, 1500))  # 3x5 @ 300dpi
+                rotatedImage = studentImage.rotate(i * 90) # Rotate in all possible orientations
+                width, height = rotatedImage.size
+                ratioWidth, ratioHeight = findThreeByFiveRatio(width, height)
+                leftCrop = (width - ratioWidth) / 2
+                upperCrop = (height - ratioHeight) / 2
+                rightCrop = leftCrop + ratioWidth
+                lowerCrop = upperCrop + ratioHeight
+                croppedStudentImage = rotatedImage.crop((leftCrop, upperCrop, rightCrop, lowerCrop))
+                resizedStudentImage = croppedStudentImage.resize((900, 1500))  # 3x5 @ 300dpi
                 # Add student's name as a watermark
                 watermarkedImage = watermarkPhoto(studentName, resizedStudentImage)
-                watermarkedImage.save(saveLocation + '\\' + studentName + '_' + i + imageExtension)
+                watermarkedImage.save(saveLocation + '\\' + studentName + '_' + str(i) + imageExtension)
         except:
-            erroredStudents.append(submissions[submissionIndex]['answers']['3']['prettyFormat'])
+            if (submissions[submissionIndex]['answers']['3']['prettyFormat'] not in erroredStudents):
+                erroredStudents.append(submissions[submissionIndex]['answers']['3']['prettyFormat'])
     for studentName in erroredStudents:
         print('Failed to watermark ' + studentName + '\'s image.  '
                                                      'They might have uploaded an incorrect file type.')
+
+
+def findThreeByFiveRatio(width, height):
+    newWidth = 3
+    newHeight = 5
+    while ((newWidth < width) and (newHeight < height)):
+        newWidth += 3
+        newHeight += 5
+    return (newWidth - 3, newHeight - 5)
 
 
 def watermarkPhoto(studentName, resizedStudentImage):
