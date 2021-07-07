@@ -20,23 +20,30 @@ def selectFormId(forms):
 
 
 def processSubmissions(submissions, apiKey, saveLocation):
+    erroredStudents = []
     for submissionIndex in tqdm(range(len(submissions))):
-        submission = submissions[submissionIndex]
-        studentName = submission['answers']['3']['prettyFormat']
-        imageUrl = submission['answers']['4']['answer'][0]
-        # Preserve format of uploaded image
-        imageExtension = imageUrl[imageUrl.rindex('.'):]
-        # Images can only be downloaded while authenticated
-        # Include API key in headers to download the image
-        imageRequest = requests.get(imageUrl, headers={'apiKey': apiKey})
-        studentImage = Image.open(BytesIO(imageRequest.content))
-        # Rotate image if uploaded sideways (assuming uploaded image is in portrait)
-        width, height = studentImage.size
-        if (width > height): studentImage.rotate(270)
-        resizedStudentImage = studentImage.resize((900, 1500)) # 3x5 @ 300dpi
-        # Add student's name as a watermark
-        watermarkedImage = watermarkPhoto(studentName, resizedStudentImage)
-        watermarkedImage.save(saveLocation + '\\' + studentName + imageExtension)
+        try:
+            submission = submissions[submissionIndex]
+            studentName = submission['answers']['3']['prettyFormat']
+            imageUrl = submission['answers']['4']['answer'][0]
+            # Preserve format of uploaded image
+            imageExtension = imageUrl[imageUrl.rindex('.'):]
+            # Images can only be downloaded while authenticated
+            # Include API key in headers to download the image
+            imageRequest = requests.get(imageUrl, headers={'apiKey': apiKey})
+            studentImage = Image.open(BytesIO(imageRequest.content))
+            # Rotate image if uploaded sideways (assuming uploaded image is in portrait)
+            width, height = studentImage.size
+            if (width > height): studentImage.rotate(270)
+            resizedStudentImage = studentImage.resize((900, 1500))  # 3x5 @ 300dpi
+            # Add student's name as a watermark
+            watermarkedImage = watermarkPhoto(studentName, resizedStudentImage)
+            watermarkedImage.save(saveLocation + '\\' + studentName + imageExtension)
+        except:
+            erroredStudents.append(submissions[submissionIndex]['answers']['3']['prettyFormat'])
+    for studentName in erroredStudents:
+        print('Failed to watermark ' + studentName + '\'s image.  '
+              'They might have uploaded an incorrect file type.')
 
 
 def watermarkPhoto(studentName, resizedStudentImage):
@@ -65,7 +72,7 @@ def main():
                              'You will need to create a folder if one does not already exist.\n'
                              '(e.g. "C:\\Users\\MartyBaker\\Documents\\WarmFuzzies2021\\")\n')
     print('\nDownloading and watermarking images now...')
-    processSubmissions(jotformClient.get_form_submissions(formId), apiKey, saveLocation)
+    processSubmissions(jotformClient.get_form_submissions(formId, limit='1000'), apiKey, saveLocation)
     print('All images have been downloaded and watermarked!')
 
 
