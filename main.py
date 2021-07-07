@@ -36,16 +36,20 @@ def processSubmissions(submissions, apiKey, saveLocation):
         watermarkedImage = watermarkPhoto(studentName, resizedStudentImage)
         watermarkedImage.save(saveLocation + '\\' + studentName + imageExtension)
 
+
 def watermarkPhoto(studentName, resizedStudentImage):
     # Add white margin (1 inch around entire image) for the student's name
     watermarkedImage = Image.new(resizedStudentImage.mode, (1200, 1800), (255, 255, 255))
-    watermarkedImage.paste(resizedStudentImage)
+    watermarkedImage.paste(resizedStudentImage, (150, 150))
     # Add student's name on bottom margin in black text
-    ImageDraw.Draw(watermarkedImage).text(
-        (0, 1650),
+    font = ImageFont.truetype('arial.ttf', size=96)
+    draw = ImageDraw.Draw(watermarkedImage)
+    textWidth, textHeight = draw.textsize(studentName, font=font)
+    draw.text(
+        ((1200 - textWidth) / 2, 1650),
         studentName,
         (0, 0, 0),
-        font=ImageFont.truetype('arial.ttf', size=12)
+        font=ImageFont.truetype('arial.ttf', size=96)
     )
     return watermarkedImage
 
